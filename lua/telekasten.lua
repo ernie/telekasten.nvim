@@ -2639,7 +2639,11 @@ local function ShowCalendar(opts)
     if opts.vertical_resize then
         vim.cmd("vertical resize +" .. opts.vertical_resize)
     end
-    vim.cmd("set signcolumn=no")
+    vim.cmd([[
+      set signcolumn=no
+      set nonumber
+      set norelativenumber
+    ]])
 end
 
 -- set up calendar integration: forward to our lua functions
