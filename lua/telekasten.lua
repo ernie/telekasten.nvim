@@ -1312,21 +1312,6 @@ local function FindDailyNotes(opts)
         return
     end
 
-    local today = os.date(dateformats.date)
-    local fname = M.Cfg.dailies .. "/" .. today .. M.Cfg.extension
-    local fexists = file_exists(fname)
-    if
-        (fexists ~= true)
-        and (
-            (opts.dailies_create_nonexisting == true)
-            or M.Cfg.dailies_create_nonexisting == true
-        )
-    then
-        create_note_from_template(today, _, fname, M.note_type_templates.daily)
-        opts.erase = true
-        opts.erase_file = fname
-    end
-
     find_files_sorted({
         prompt_title = "Find daily note",
         cwd = M.Cfg.dailies,
@@ -1349,7 +1334,7 @@ end
 -- FindWeeklyNotes:
 -- ---------------
 --
--- Select from daily notes
+-- Select from weekly notes
 --
 local function FindWeeklyNotes(opts)
     opts = opts or {}
@@ -1360,21 +1345,6 @@ local function FindWeeklyNotes(opts)
 
     if not global_dir_check() then
         return
-    end
-
-    local title = os.date(dateformats.isoweek)
-    local fname = M.Cfg.weeklies .. "/" .. title .. M.Cfg.extension
-    local fexists = file_exists(fname)
-    if
-        (fexists ~= true)
-        and (
-            (opts.weeklies_create_nonexisting == true)
-            or M.Cfg.weeklies_create_nonexisting == true
-        )
-    then
-        create_note_from_template(title, _, fname, M.note_type_templates.weekly)
-        opts.erase = true
-        opts.erase_file = fname
     end
 
     find_files_sorted({
@@ -1726,8 +1696,8 @@ local function GotoDate(opts)
     if
         (fexists ~= true)
         and (
-            (opts.follow_creates_nonexisting == true)
-            or M.Cfg.follow_creates_nonexisting == true
+            (opts.dailies_create_nonexisting == true)
+            or M.Cfg.dailies_create_nonexisting == true
         )
     then
         create_note_from_template(
