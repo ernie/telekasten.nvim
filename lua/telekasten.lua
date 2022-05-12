@@ -191,17 +191,13 @@ local function random_variable(length)
 end
 
 local function get_uuid(opts)
-    opts.prefix_title_by_uuid = opts.prefix_title_by_uuid
-        or M.Cfg.prefix_title_by_uuid
     opts.uuid_type = opts.uuid_type or M.Cfg.uuid_type
 
     local uuid
-    if opts.prefix_title_by_uuid then
-        if opts.uuid_type ~= "rand" then
-            uuid = os.date(opts.uuid_type)
-        else
-            uuid = random_variable(6)
-        end
+    if opts.uuid_type ~= "rand" then
+        uuid = os.date(opts.uuid_type)
+    else
+        uuid = random_variable(6)
     end
     return uuid
 end
