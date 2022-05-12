@@ -204,7 +204,7 @@ end
 
 local function concat_uuid_title(uuid, title)
     local sep = M.Cfg.uuid_sep or "-"
-    if uuid == nil then
+    if uuid == nil or not M.Cfg.prefix_title_by_uuid then
         return title
     else
         return uuid .. sep .. title
