@@ -5,7 +5,7 @@ local hashtag_re =
     "(^|\\s|'|\")((?!(#[a-fA-F0-9]{3})(\\W|$)|(#[a-fA-F0-9]{6})(\\W|$))#[a-zA-ZÀ-ÿ]+[a-zA-ZÀ-ÿ0-9/\\-_]*)"
 local colon_re = "(^|\\s):[a-zA-ZÀ-ÿ]+[a-zA-ZÀ-ÿ0-9/\\-_]*:"
 local yaml_re =
-    "(^|\\s)tags:\\s*\\[([a-zA-ZÀ-ÿ]+[a-zA-ZÀ-ÿ0-9/\\-_]*(,\\s)*)*]"
+    "(^|\\s)tags:\\s*\\[\\s*([a-zA-ZÀ-ÿ]+[a-zA-ZÀ-ÿ0-9/\\-_]*(,\\s*)*)*\\s*]"
 
 local function command_find_all_tags(opts)
     opts = opts or {}
@@ -82,13 +82,13 @@ local function yaml_to_tags(line, entry, ret)
     local prev_i = 1
     local tag
     while true do
-        i, j = line:find("%s*.*%s*,", i)
+        i, j = line:find("%s*(%S*)%s*,", i)
         if i == nil then
             tag = line:sub(prev_i)
-            tag = tag:gsub("%s*(.*)%s*", "%1")
+            tag = tag:gsub("%s*(%S*)%s*", "%1")
         else
             tag = line:sub(i, j)
-            tag = tag:gsub("%s*(.*)%s*,", "%1")
+            tag = tag:gsub("%s*(%S*)%s*,", "%1")
         end
 
         local new_entry = {}
