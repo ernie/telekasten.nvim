@@ -147,9 +147,15 @@ telekasten.setup({opts})
 
       vaults = {
         personal = {
-          --configuration for personal vault
+          -- configuration for personal vault. E.g.:
+          -- home = "/home/user/vaults/personal",
         }
       },
+      -- how to preview media files
+      -- "telescope-media-files" if you have telescope-media-files.nvim installed
+      -- "catimg-previewer" if you have catimg installed
+      -- "viu-previewer" if you have viu installed
+      media_previewer = "telescope-media-files",
     }
 <
 
@@ -398,6 +404,20 @@ telekasten.setup({opts})
         has been renamed.
 
         Default: `true`
+
+                                       *telekasten.settings.media_previewer*
+    media_previewer:~
+        Previewer used for viewing media / image files. There are two
+        options:
+        - `'telescope-media-files'` : use the telescope-media-files.nvim
+          plugin
+        - `'catimg-previewer'` : use the built-in `catimg` previewer.
+          Requires `catimg` to be installed.
+        - `'viu-previewer'` : use the built-in `viu` previewer.
+          Requires `viu` to be installed.
+
+        Default: `telescope-media-files`
+
                                                *telekasten.calendar_opts*
     -----------------------------------
     Valid keys for {opts.calendar_opts}
@@ -827,27 +847,28 @@ The following substitutions will be made during new note creation:
 | specifier       |                       |                             |
 | in template     | expands to            | example                     |
 +-----------------+-----------------------+-----------------------------+
-| `{{title}}`       | the title of the note | My new note                 |
-| `{{uuid}}`        | UUID of the note      | 202201271129                |
-| `{{date}}`        | date in iso format    | 2021-11-21                  |
-| `{{prevday}}`     | previous day, iso     | 2021-11-20                  |
-| `{{nextday}}`     | next day, iso         | 2021-11-22                  |
-| `{{hdate}}`       | date in long format   | Sunday, November 21st, 2021 |
-| `{{rfc3339}}`     | date in RFC3339 format| 2021-11-21T14:30Z+01:00     |
-| `{{week}}`        | week of the year      | 46                          |
-| `{{prevweek}}`    | previous week         | 45                          |
-| `{{nextweek}}`    | next week             | 47                          |
-| `{{isoweek}}`     | week in iso format    | 2021-46                     |
-| `{{isoprevweek}}` | last week, iso        | 2021-45                     |
-| `{{isonextweek}}` | next week, iso        | 2021-47                     |
-| `{{year}}`        | year                  | 2021                        |
-| `{{monday}}`      | Monday, iso           | 2021-11-15                  |
-| `{{tuesday}}`     | Tuesday, iso          | 2021-11-16                  |
-| `{{wednesday}}`   | Wednesday, iso        | 2021-11-17                  |
-| `{{thursday}}`    | Thursday, iso         | 2021-11-18                  |
-| `{{friday}}`      | Friday, iso           | 2021-11-19                  |
-| `{{saturday}}`    | Saturday, iso         | 2021-11-20                  |
-| `{{sunday}}`      | Sunday, iso (see note)| 2021-11-21                  |
+| `{{title}}`       | the title of the note       | My new note                 |
+| `{{shorttitle}}   | the short title of the note | dir/dir/My Note -> My Note  |
+| `{{uuid}}`        | UUID of the note            | 202201271129                |
+| `{{date}}`        | date in iso format          | 2021-11-21                  |
+| `{{prevday}}`     | previous day, iso           | 2021-11-20                  |
+| `{{nextday}}`     | next day, iso               | 2021-11-22                  |
+| `{{hdate}}`       | date in long format         | Sunday, November 21st, 2021 |
+| `{{rfc3339}}`     | date in RFC3339 format      | 2021-11-21T14:30Z+01:00     |
+| `{{week}}`        | week of the year            | 46                          |
+| `{{prevweek}}`    | previous week               | 45                          |
+| `{{nextweek}}`    | next week                   | 47                          |
+| `{{isoweek}}`     | week in iso format          | 2021-46                     |
+| `{{isoprevweek}}` | last week, iso              | 2021-45                     |
+| `{{isonextweek}}` | next week, iso              | 2021-47                     |
+| `{{year}}`        | year                        | 2021                        |
+| `{{monday}}`      | Monday, iso                 | 2021-11-15                  |
+| `{{tuesday}}`     | Tuesday, iso                | 2021-11-16                  |
+| `{{wednesday}}`   | Wednesday, iso              | 2021-11-17                  |
+| `{{thursday}}`    | Thursday, iso               | 2021-11-18                  |
+| `{{friday}}`      | Friday, iso                 | 2021-11-19                  |
+| `{{saturday}}`    | Saturday, iso               | 2021-11-20                  |
+| `{{sunday}}`      |  Sunday, iso (see note)| 2021-11-21                         |
 +-----------------+-----------------------+-----------------------------+
 Note: Sunday is adjusted to match the user's `calendar_monday` preference.
 
@@ -924,7 +945,7 @@ Section 3.6 Mutliple home directories               *telekasten.switch_vaults*
 
 You can have multiple home directories setup in telekasten. The configuration
 for each vault is stored as a map in telekasten. You can use `switch_vaults
-to launch a picker to choose the vaults. 
+to launch a picker to choose the vaults.
 
 
 ================================================================================

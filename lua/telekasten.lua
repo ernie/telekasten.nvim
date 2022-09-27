@@ -149,6 +149,12 @@ local function defaultConfig(home)
 
         -- should all links be updated when a file is renamed
         rename_update_links = true,
+
+        -- how to preview media files
+        -- "telescope-media-files" if you have telescope-media-files.nvim installed
+        -- "catimg-previewer" if you have catimg installed
+        -- "viu-previewer" if you have viu installed
+        media_previewer = "telescope-media-files",
     }
     M.Cfg = cfg
     M.note_type_templates = {
@@ -607,6 +613,11 @@ local function linesubst(line, title, dates, uuid)
         uuid = ""
     end
 
+    local shorttitle = string.match(title, "^.+/(.+)$")
+    if shorttitle == nil then
+        shorttitle = title
+    end
+
     local substs = {
         hdate = dates.hdate,
         week = dates.week,
@@ -631,6 +642,7 @@ local function linesubst(line, title, dates, uuid)
         saturday = dates.saturday,
 
         title = title,
+        shorttitle = shorttitle,
         uuid = uuid,
     }
     for k, v in pairs(substs) do
@@ -964,7 +976,22 @@ local media_files_base_directory = M.base_directory
     .. "/telescope-media-files.nvim"
 local defaulter = utils.make_default_callable
 local media_preview = defaulter(function(opts)
-    local preview_cmd = media_files_base_directory .. "/scripts/vimg"
+    local preview_cmd = ""
+    if M.Cfg.media_previewer == "telescope-media-files" then
+        preview_cmd = media_files_base_directory .. "/scripts/vimg"
+    end
+
+    if M.Cfg.media_previewer == "catimg-previewer" then
+        preview_cmd = M.base_directory
+            .. "/telekasten.nvim/scripts/catimg-previewer"
+    end
+
+    if vim.startswith(M.Cfg.media_previewer, "viu-previewer") then
+        preview_cmd = M.base_directory
+            .. "/telekasten.nvim/scripts/"
+            .. M.Cfg.media_previewer
+    end
+
     if vim.fn.executable(preview_cmd) == 0 then
         print("Previewer not found: " .. preview_cmd)
         return conf.file_previewer(opts)
@@ -977,6 +1004,7 @@ local media_preview = defaulter(function(opts)
             if vim.tbl_isempty(tmp_table) then
                 return { "echo", "" }
             end
+            print(tmp_table[1])
             return {
                 preview_cmd,
                 tmp_table[1],
@@ -2882,6 +2910,7 @@ local function Setup(cfg)
     if has_pcre == 0 then
         M.Cfg.rg_pcre = true
     end
+    M.Cfg.media_previewer = cfg.media_previewer
 end
 
 local function _setup(cfg)
@@ -2976,6 +3005,7 @@ local TelekastenCmd = {
             { "browse media", "browse_media", M.browse_media },
             { "panel", "panel", M.panel },
             { "show tags", "show_tags", M.show_tags },
+            { "switch vault", "switch_vault", M.switch_vault },
         }
     end,
 }

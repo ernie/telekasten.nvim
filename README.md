@@ -27,7 +27,7 @@ mixing it with a journal, based on [telescope.nvim](https://github.com/nvim-tele
 - paste images from clipboard
 - toggle [ ] todo status of line
 - insert links to images
-- **image previews**, via extension _(Linux only)_
+- **image previews**, via `catimg`, `viu`, or extension
 
 <div align="center">
 
@@ -112,29 +112,32 @@ of being able to edit it.
 
 <!-- vim-markdown-toc GFM -->
 
-- [0. Install and setup](#0-install-and-setup)
-  - [0.0 Prerequisites](#00-prerequisites)
-    - [0.0.1 Telescope](#001-telescope)
-    - [0.0.2 calendar-vim Plugin (optional)](#002-calendar-vim-plugin-optional)
-    - [0.0.3 For pasting images: xclip (optional)](#003-for-pasting-images-xclip-optional)
-    - [0.0.4 For image previews: telescope-media-files.nvim (optional)](#004-for-image-previews-telescope-media-filesnvim-optional)
-  - [0.1 Install the plugin](#01-install-the-plugin)
-    - [0.1.0 Other useful plugins](#010-other-useful-plugins)
-  - [0.2 Configure telekasten.nvim](#02-configure-telekastennvim)
-  - [0.3 Configure your own colors](#03-configure-your-own-colors)
-- [1. Get Help](#1-get-help)
-- [2. Use it](#2-use-it)
-  - [2.0 Telekasten command](#20-telekasten-command)
-  - [2.1 Telekasten command palette](#21-telekasten-command-palette)
-  - [2.2 Telekasten lua functions](#22-telekasten-lua-functions)
-  - [2.3 Link notation](#23-link-notation)
-  - [2.4 Tag notation](#24-tag-notation)
-  - [2.5 Note templates](#25-note-templates)
-    - [2.5.1 Template files](#251-template-files)
-  - [2.6 Using the calendar](#26-using-the-calendar)
-  - [2.7 Using the telescope pickers](#27-using-the-telescope-pickers)
-- [3. Bind it](#3-bind-it)
-- [4. The hardcoded stuff](#4-the-hardcoded-stuff)
+* [0. Install and setup](#0-install-and-setup)
+    * [0.0 Prerequisites](#00-prerequisites)
+        * [0.0.1 Telescope](#001-telescope)
+        * [0.0.2 calendar-vim Plugin (optional)](#002-calendar-vim-plugin-optional)
+        * [0.0.3 For pasting images: xclip (optional)](#003-for-pasting-images-xclip-optional)
+        * [0.0.4 For image previews: telescope-media-files.nvim (optional)](#004-for-image-previews-telescope-media-filesnvim-optional)
+            * [catimg](#catimg)
+            * [viu](#viu)
+            * [telescope-media-files.nvim](#telescope-media-filesnvim)
+    * [0.1 Install the plugin](#01-install-the-plugin)
+        * [0.1.0 Other useful plugins](#010-other-useful-plugins)
+    * [0.2 Configure telekasten.nvim](#02-configure-telekastennvim)
+    * [0.3 Configure your own colors](#03-configure-your-own-colors)
+* [1. Get Help](#1-get-help)
+* [2. Use it](#2-use-it)
+    * [2.0 Telekasten command](#20-telekasten-command)
+    * [2.1 Telekasten command palette](#21-telekasten-command-palette)
+    * [2.2 Telekasten lua functions](#22-telekasten-lua-functions)
+    * [2.3 Link notation](#23-link-notation)
+    * [2.4 Tag notation](#24-tag-notation)
+    * [2.5 Note templates](#25-note-templates)
+        * [2.5.1 Template files](#251-template-files)
+    * [2.6 Using the calendar](#26-using-the-calendar)
+    * [2.7 Using the telescope pickers](#27-using-the-telescope-pickers)
+* [3. Bind it](#3-bind-it)
+* [4. The hardcoded stuff](#4-the-hardcoded-stuff)
 
 <!-- vim-markdown-toc -->
 
@@ -178,10 +181,34 @@ On Macs, you should not install a separate tool.  Installing xclip will prevent 
 
 #### 0.0.4 For image previews: telescope-media-files.nvim (optional)
 
-**ONLY supported on Linux**
+There are two supported ways to preview images:
 
-To preview images, PDFs, etc. in Telescope while searching for an image to insert a link to, you need to install the
-Telescope extension [telescope-media-files.nvim](https://github.com/nvim-telescope/telescope-media-files.nvim).
+- via [telescope-media-files.nvim](https://github.com/nvim-telescope/telescope-media-files.nvim)
+  - **ONLY supported on Linux**
+- via [catimg](https://github.com/posva/catimg)
+  - supported at least on Linux and macOS
+- via [viu](https://github.com/atanunq/viu)
+  - supports both iTerm and Kitty graphics protocols.
+  - Note: on my Linux machine, Kitty graphics rendering inside neovim /
+    telescope does not work at all, so it falls back to block rendering
+    mode.
+
+##### catimg
+
+Just install [catimg](https://github.com/posva/catimg), then set
+`media_previewer` to `"catimg-previewer"` in the config.
+
+##### viu
+
+Just install [viu](https://github.com/atanunq/viu), then set
+`media_previewer` to `"viu-previewer"` in the config.
+
+##### telescope-media-files.nvim
+
+Per default, or by setting `media_previewer` to `"telescope-media-files"` in the
+config, images, PDFs, etc. can be previewed in Telescope while searching for an
+image to insert a link to, you need to install the Telescope extension
+[telescope-media-files.nvim](https://github.com/nvim-telescope/telescope-media-files.nvim).
 
 This extension has its own list of prerequisites, of which I recommend (and use) the following:
 
@@ -373,8 +400,15 @@ require('telekasten').setup({
         vault2 = {
             -- alternate configuration for vault2 here. Missing values are defaulted to
             -- default values from telekasten.
+            -- e.g.
+            -- home = "/home/user/vaults/personal",
         },
     },
+
+    -- how to preview media files
+    -- "telescope-media-files" if you have telescope-media-files.nvim installed
+    -- "catimg-previewer" if you have catimg installed
+    media_previewer = "telescope-media-files",
 })
 END
 ```
@@ -435,6 +469,10 @@ END
 | | - `smart` (default): put daily-looking (date as title) into the daily folder, weekly-looking notes into the weekly folder, all other ones into the home folder, except for notes with `sub/folders` in the title.|  |
 | | - `prefer_home`: put all notes in home folder except for `goto_today()` and `goto_thisweek()`, and notes with `sub/folders` in the title ||
 | | - `same_as_current`: put all new notes in the directory of the currently open note (where the cursor is) if present or else into the home folder, except for notes with `sub/folders/` in the title||
+| `vaults` | a table of additional vault configurations. Default config values are assumed for all config settings that are not specified for additional vaults | `vaults = { second_vault = { home = "/home/rs/vaults/second", }, third_vault: { home = "/home/rs/vaults/third", }, }` |
+| `media_previewer` | how to preview media files | default: `telescope-media-files` |
+|| - `telescope-media-files` if you have telescope-media-files.nvim installed |
+|| - `catimg-previewer` if you have catimg installed |
 
 The calendar support has its own options, contained in `calendar_opts`:
 
@@ -543,6 +581,9 @@ the list for a more detailed description:
 - `preview_img` : preview image under the cursor
 - `browse_media` : Browse images / media files
 - `rename_note` : Rename current note and update the links pointing to it
+- `show_tags` : brings up the tag list. From there you can select a tag to search for tagged notes - or yank or insert the tag
+- `switch_vault` : switch the vault. Brings up a picker. See the `vaults` config
+  option for more.
 
 The Telekasten command supports sub-command completion, in my case by pressing <kbd>TAB</kbd>.
 
@@ -781,6 +822,7 @@ Currently, the following substitutions will be made during new note creation:
 | specifier in template | expands to | example |
 | --- | --- | --- |
 | `{{title}}` | the title of the note | My new note |
+| `{{shorttitle}}` | the short title of the note | dir/subdir/My Note -> My Note |
 | `{{uuid}}` | UUID for the note | 202201271129 |
 | `{{date}}` | date in iso format | 2021-11-21 |
 | `{{prevday}}` | previous day's date in iso format | 2021-11-20 |
