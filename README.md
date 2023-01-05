@@ -112,32 +112,32 @@ of being able to edit it.
 
 <!-- vim-markdown-toc GFM -->
 
-* [0. Install and setup](#0-install-and-setup)
-    * [0.0 Prerequisites](#00-prerequisites)
-        * [0.0.1 Telescope](#001-telescope)
-        * [0.0.2 calendar-vim Plugin (optional)](#002-calendar-vim-plugin-optional)
-        * [0.0.3 For pasting images: xclip (optional)](#003-for-pasting-images-xclip-optional)
-        * [0.0.4 For image previews: telescope-media-files.nvim (optional)](#004-for-image-previews-telescope-media-filesnvim-optional)
-            * [catimg](#catimg)
-            * [viu](#viu)
-            * [telescope-media-files.nvim](#telescope-media-filesnvim)
-    * [0.1 Install the plugin](#01-install-the-plugin)
-        * [0.1.0 Other useful plugins](#010-other-useful-plugins)
-    * [0.2 Configure telekasten.nvim](#02-configure-telekastennvim)
-    * [0.3 Configure your own colors](#03-configure-your-own-colors)
-* [1. Get Help](#1-get-help)
-* [2. Use it](#2-use-it)
-    * [2.0 Telekasten command](#20-telekasten-command)
-    * [2.1 Telekasten command palette](#21-telekasten-command-palette)
-    * [2.2 Telekasten lua functions](#22-telekasten-lua-functions)
-    * [2.3 Link notation](#23-link-notation)
-    * [2.4 Tag notation](#24-tag-notation)
-    * [2.5 Note templates](#25-note-templates)
-        * [2.5.1 Template files](#251-template-files)
-    * [2.6 Using the calendar](#26-using-the-calendar)
-    * [2.7 Using the telescope pickers](#27-using-the-telescope-pickers)
-* [3. Bind it](#3-bind-it)
-* [4. The hardcoded stuff](#4-the-hardcoded-stuff)
+- [0. Install and setup](#0-install-and-setup)
+  - [0.0 Prerequisites](#00-prerequisites)
+    - [0.0.1 Telescope](#001-telescope)
+    - [0.0.2 calendar-vim Plugin (optional)](#002-calendar-vim-plugin-optional)
+    - [0.0.3 For pasting images: xclip (optional), wl-clipboard (optional)](#003-for-pasting-images-xclip-optional-wl-clipboard-optional)
+    - [0.0.4 For image previews: telescope-media-files.nvim (optional)](#004-for-image-previews-telescope-media-filesnvim-optional)
+      - [catimg](#catimg)
+      - [viu](#viu)
+      - [telescope-media-files.nvim](#telescope-media-filesnvim)
+  - [0.1 Install the plugin](#01-install-the-plugin)
+    - [0.1.0 Other useful plugins](#010-other-useful-plugins)
+  - [0.2 Configure telekasten.nvim](#02-configure-telekastennvim)
+  - [0.3 Configure your own colors](#03-configure-your-own-colors)
+- [1. Get Help](#1-get-help)
+- [2. Use it](#2-use-it)
+  - [2.0 Telekasten command](#20-telekasten-command)
+  - [2.1 Telekasten command palette](#21-telekasten-command-palette)
+  - [2.2 Telekasten lua functions](#22-telekasten-lua-functions)
+  - [2.3 Link notation](#23-link-notation)
+  - [2.4 Tag notation](#24-tag-notation)
+  - [2.5 Note templates](#25-note-templates)
+    - [2.5.1 Template files](#251-template-files)
+  - [2.6 Using the calendar](#26-using-the-calendar)
+  - [2.7 Using the telescope pickers](#27-using-the-telescope-pickers)
+- [3. Bind it](#3-bind-it)
+- [4. The hardcoded stuff](#4-the-hardcoded-stuff)
 
 <!-- vim-markdown-toc -->
 
@@ -164,7 +164,7 @@ See below for installing and using it.
 
 ---
 
-#### 0.0.3 For pasting images: xclip (optional)
+#### 0.0.3 For pasting images: xclip (optional), wl-clipboard (optional)
 
 Telekasten.nvim supports pasting images from the clipboard. Currently, this is implemented for systems that have
 the `xclip` utility installed or on macs.
@@ -174,6 +174,8 @@ On Ubuntu/Debian like systems:
 ```console
 sudo apt-get install xclip
 ```
+
+On [Wayland](https://wayland.freedesktop.org/) systems you can install [wl-clipboard](https://github.com/bugaevc/wl-clipboard)
 
 On Macs, you should not install a separate tool.  Installing xclip will prevent this feature from working properly.
 
@@ -300,7 +302,12 @@ require('telekasten').setup({
     -- "uuid-title" - Prefix title by uuid
     -- "title-uuid" - Suffix title with uuid
     new_note_filename = "title",
-    -- file uuid type ("rand" or input for os.date()")
+
+    --[[ file UUID type
+        - "rand"
+        - string input for os.date()
+        - or custom lua function that returns a string
+    --]]
     uuid_type = "%Y%m%d%H%M",
     -- UUID separator
     uuid_sep = "-",
@@ -409,6 +416,9 @@ require('telekasten').setup({
     -- "telescope-media-files" if you have telescope-media-files.nvim installed
     -- "catimg-previewer" if you have catimg installed
     media_previewer = "telescope-media-files",
+
+    -- A customizable fallback handler for urls.
+    follow_url_fallback = nil,
 })
 END
 ```
@@ -473,6 +483,7 @@ END
 | `media_previewer` | how to preview media files | default: `telescope-media-files` |
 || - `telescope-media-files` if you have telescope-media-files.nvim installed |
 || - `catimg-previewer` if you have catimg installed |
+| `follow_url_fallback` | A customizable fallback handler for urls. | default: `nil` |
 
 The calendar support has its own options, contained in `calendar_opts`:
 
@@ -561,7 +572,7 @@ the list for a more detailed description:
 
 - `panel` : brings up the [command palette](#21-telekasten-command-palette)
 - `find_notes` : Find notes by title (filename)
-- `show_tags` : Search through all tags
+- `show_tags` : brings up the tag list. From there you can select a tag to search for tagged notes - or yank or insert the tag
 - `find_daily_notes` : Find daily notes by title (date)
 - `search_notes` : Search (grep) in all notes
 - `insert_link` : Insert a link to a note
@@ -581,7 +592,6 @@ the list for a more detailed description:
 - `preview_img` : preview image under the cursor
 - `browse_media` : Browse images / media files
 - `rename_note` : Rename current note and update the links pointing to it
-- `show_tags` : brings up the tag list. From there you can select a tag to search for tagged notes - or yank or insert the tag
 - `switch_vault` : switch the vault. Brings up a picker. See the `vaults` config
   option for more.
 
@@ -647,7 +657,8 @@ The plugin defines the following functions:
   - **note**:
     - this function accepts a parameter `{i}`. If `true`, it will enter input mode by pressing the 'A' key. This is
       useful when being used in a simple `inoremap` key mapping like shown in [Bind it](#3-bind-it).
-    - example: `insert_link({ i=true })`
+      - example: `insert_link({ i=true })`
+    - this function accepts a parameter `{with_live_grep}`. If `true`, it will use live_grep picker and you can search file by file contents.
 - `follow_link()`: take text between brackets (linked note) or of a tag and open a Telescope file finder with it: selects note to
   open (incl. preview) - with optional note creation for non-existing notes, honoring the configured template
   - **note**:
@@ -661,6 +672,12 @@ The plugin defines the following functions:
     - this function accepts a parameter `{i}`. If `true`, it will enter input mode by pressing the 'A' key. This is
       useful when being used in a simple `inoremap` key mapping like shown in [Bind it](#3-bind-it).
     - example: `toggle_todo({ i=true })`
+    - this function also accepts `{v}` for visual mode. If `true`, then it will look for a visual range of text to
+      toggle. When setting this to a keymapping, use `:` instead of `<cr>` to create the command as seen below:
+    - example keymapping: `:lua require('telekasten').toggle_todo({ v = true })<cr>`
+    - this function has also a `{onlyTodo}` parameter. If `true`, this will
+      avoid circling back to a regular list (`-`).
+    - this function can also be used in `visual` mode  to toggle the status of multiple lines.
 - `show_backlinks()` : opens a telescope search for notes that `[[link]]` back to the current note.
 - `find_friends()` : opens a telescope search for notes that also `[[link]]` to the link under the cursor.
 - `insert_img_link()` : opens a telescope search for all media (PDFs, images, videos (MP4, webm)) and places a markdown
@@ -699,6 +716,8 @@ The following links are supported:
                                       named 'A cool title'
 - [[A cool title#^xxxxxxxx]]  ....... links to the paragraph with id ^xxxxxxxx within the note
                                       named 'A cool title'
+- [[201705061300|A cool title]] ..... links to the note named `201705061300` but shows the link as
+                                      `A cool title` if `conceallevel=2`
 - [[#Heading 27]]  .................. links to the heading 'Heading 27' within all notes
 - [[#^xxxxxxxx]]  ................... links to the paragraph with id ^xxxxxxxx within all notes
 
@@ -825,6 +844,8 @@ Currently, the following substitutions will be made during new note creation:
 | `{{shorttitle}}` | the short title of the note | dir/subdir/My Note -> My Note |
 | `{{uuid}}` | UUID for the note | 202201271129 |
 | `{{date}}` | date in iso format | 2021-11-21 |
+| `{{time24}}` | time with 24 hour clock | 19:12:23 |
+| `{{time12}}` | time with 12 hour clock | 07:12:23 PM |
 | `{{prevday}}` | previous day's date in iso format | 2021-11-20 |
 | `{{nextday}}` | next day's date in iso format | 2021-11-22 |
 | `{{hdate}}` | date in long format | Sunday, November 21st, 2021 |

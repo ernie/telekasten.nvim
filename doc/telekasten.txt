@@ -243,8 +243,9 @@ telekasten.setup({opts})
 
                                            *telekasten.settings.uuid_type*
     uuid_type: ~
-        Type of UUID. Could be 'rand' for a random 6 character string, or a
-        time format to input in os.date() such as %Y%m%d%H%M.
+        Type of UUID. Could be 'rand' for a random 6 character string, a
+        time format to input in os.date() such as '%Y%m%d%H%M', or any lua
+        function like os.time() that returns a string.
 
         Default: '%Y%m%d%H%M'
 
@@ -418,6 +419,13 @@ telekasten.setup({opts})
 
         Default: `telescope-media-files`
 
+                                    *telekasten.settings.follow_url_fallback*
+    follow_url_fallback:~
+        A customizable fallback handler for urls.
+        When it set to nil, Telekasten will use `xdg-open` or `open`
+
+        Default: `nil`
+        Example: `"call jobstart('firefox --new-window {{url}}')"`
                                                *telekasten.calendar_opts*
     -----------------------------------
     Valid keys for {opts.calendar_opts}
@@ -468,9 +476,17 @@ groups:
 - `tkBrackets` : the brackets surrounding the link title
 - `tkHighlight` : ==highlighted== text (non-standard markdown)
 - `tkTag` :  well, tags
+- `tkAliasedLink` : link with alias
+- `tkHighlightedAliasedLink` : link with alias in `tkAliasedLink`
+- `tkLinkAlias` : body of the link (left part of `[[aaa|bbb]]`)
+- `tkLinkBody` : alias of the link (right part of `[[aaa|bbb]]`)
 
 `tkHighlight`, has nothing to do with links but I added it anyway, since I like
 highlighting text when taking notes.
+
+Plugin supports wiki-link aliases: `[[value|alias]]`. These links will be
+concealed to `[[alias]]` if `conceallevel=2`.
+
 
 I also like the navigation buttons of the calendar to appear less prevalent, so
 I redefine the `CalNavi` class as well.
@@ -522,8 +538,15 @@ telekasten.new_templated_note()~
   See also:~
       - |telekasten.template_files|
                                                     *telekasten.find_notes()*
-telekasten.find_notes()~
+telekasten.find_notes({opts})~
   Opens a Telescope file finder and lets you pick a note by title (file name).
+
+  Valid keys for {opts}
+
+  with_live_grep:~
+    If `true`, it will use live_grep picker and you can search file by file contents.
+
+    Default: `nil`
 
                                               *telekasten.find_daily_notes()*
 telekasten.find_daily_notes()~
@@ -618,6 +641,11 @@ telekasten.insert_link({opts})~
 
     Default: `nil`
 
+  with_live_grep:~
+    If `true`, it will use live_grep picker and you can search file by file contents.
+
+    Default: `nil`
+
                                                    *telekasten.follow_link()*
 telekasten.insert_link()~
   Take the text between the brackets of a link pointing to a linked note, or
@@ -649,6 +677,11 @@ telekasten.toggle_todo({opts})~
   Turns a line into a `- [ ] ` todo line, or toggle between `- [ ]`, `- [x]`,
   and `-` .
 
+  This can also be used in visual mode to toggle the status of multiple lines.
+  If using a keymapping to `toggle_todo` in visual mode, make sure the `rhs` is
+  `:Telekasten` `toggle_todo<CR>` instead of `<cmd>Telekasten` `toggle_todo<CR>`
+  to avoid neovim sending the wrong visual selection.
+
   Valid keys for {opts}
 
   i:~
@@ -657,6 +690,15 @@ telekasten.toggle_todo({opts})~
     |telekasten.mappings|.
 
     Default: `nil`
+  v:~
+    If `true`, it will look for a visual range to toggle.
+
+  onlyTodo:
+    If true, it will avoid circling back to a regular list - when toggle_todo
+    is called on - [x] items.
+
+    Default: nil
+
 
                                                 *telekasten.show_backlinks()*
 telekasten.show_backlinks()~
@@ -716,6 +758,13 @@ Note links~
 
 `[[A cool title#^xxxxxxxx]]`  ....... links to the paragraph with id ^xxxxxxxx
                                     within the note named 'A cool title'
+
+`[[201705061300|A cool title]]` ..... links to the note named `201705061300` but
+                                    shows the link as `A cool title` if
+                                    `conceallevel=2`
+
+`[[A cool title|xxxxxxxx]]`  ........ links note 'A cool title' with using
+                                    name.
 
 `[[#Heading 27]]`  .................. links to the heading 'Heading 27' within
                                     all notes
@@ -851,6 +900,8 @@ The following substitutions will be made during new note creation:
 | `{{shorttitle}}   | the short title of the note | dir/dir/My Note -> My Note  |
 | `{{uuid}}`        | UUID of the note            | 202201271129                |
 | `{{date}}`        | date in iso format          | 2021-11-21                  |
+| `{{time24}}`      | time with 24 hour clock     | 19:12:23                    |
+| `{{time12}}`      | time with 12 hour clock     | 07:12:23 PM                 |
 | `{{prevday}}`     | previous day, iso           | 2021-11-20                  |
 | `{{nextday}}`     | next day, iso               | 2021-11-22                  |
 | `{{hdate}}`       | date in long format         | Sunday, November 21st, 2021 |
@@ -969,6 +1020,8 @@ However, here are some suggestions:
  nnoremap <leader>zC :CalendarT<CR>
  nnoremap <leader>zi :lua require('telekasten').paste_img_and_link()<CR>
  nnoremap <leader>zt :lua require('telekasten').toggle_todo()<CR>
+ " Toggling todos in visual mode
+ vnoremap <leader>zt :lua require('telekasten').toggle_todo({ v = true })<CR>
  nnoremap <leader>zb :lua require('telekasten').show_backlinks()<CR>
  nnoremap <leader>zF :lua require('telekasten').find_friends()<CR>
  nnoremap <leader>zI :lua require('telekasten').insert_img_link({ i=true })<CR>
